@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; frame-src https: http:; script-src 'self' 'unsafe-inline'">
+<title>Orbit</title><link rel="stylesheet" href="style.css"></head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     ONBOARDING SCREEN
+══════════════════════════════════════════════ -->
+<div id="onboarding">
+  <div id="ob-bg"></div>
+  <div id="ob-inner">
+    <button id="ob-close" title="Close (Esc)">✕</button>
+    <div id="ob-logo"><span class="logo-ring"></span> Orbit</div>
+    <h1 id="ob-title">What are you into?</h1>
+    <p id="ob-sub">Pick up to 3 — Orbit adapts itself just for you.</p>
+    <div id="ob-cards"></div>
+    <!-- "Other" custom persona -->
+    <div id="ob-other-wrap">
+      <input id="ob-other" placeholder="Something else? Type your interest…" maxlength="60" autocomplete="off">
+      <button id="ob-other-btn">✦ Add</button>
+    </div>
+    <p id="ob-sel-hint"></p>
+    <button id="ob-launch" disabled>🚀 Launch Orbit</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     3-D TAB SWITCHER OVERLAY
+══════════════════════════════════════════════ -->
+<div id="tab-switcher" class="hidden">
+  <div id="ts-stage"></div>
+  <div id="ts-hint">← → move &nbsp;·&nbsp; Enter select &nbsp;·&nbsp; Esc close</div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     AI SIDEBAR
+══════════════════════════════════════════════ -->
+<aside id="ai-panel" class="hidden">
+  <div id="ai-header">
+    <span>✦ Orbit AI</span>
+    <button id="ai-close">✕</button>
+  </div>
+  <div id="ai-msgs"></div>
+  <div id="ai-chips"></div>
+  <form id="ai-form">
+    <input id="ai-input" placeholder="Ask anything…" autocomplete="off">
+    <button type="submit">↑</button>
+  </form>
+</aside>
+
+<!-- ══════════════════════════════════════════════
+     MAIN BROWSER CHROME
+══════════════════════════════════════════════ -->
+
+<!-- SIDEBAR TABS (layout=sidebar) -->
+<aside id="side">
+  <div class="brand"><span class="logo-ring"></span><span class="brand-text">Orbit</span></div>
+  <div id="side-tabs"></div>
+  <button id="newTab" class="add">+ New Tab</button>
+  <div id="side-footer">
+    <button id="collapseBtn" title="Collapse sidebar">◀</button>
+    <button id="interestsBtn" title="Change interests">🎨</button>
+    <button id="ts-open-btn" title="Tab switcher (Ctrl+Tab)">⬡</button>
+  </div>
+</aside>
+
+<!-- TOP TABS (layout=top) -->
+<div id="top-tabbar">
+  <div id="top-tabs"></div>
+  <button id="top-newTab" class="add-top">+</button>
+  <div id="top-actions">
+    <button id="top-interestsBtn" title="Change interests">🎨</button>
+    <button id="top-ts-btn" title="Tab switcher">⬡</button>
+    <button id="top-aiBtn" title="AI">✦</button>
+  </div>
+</div>
+
+<!-- CARDS TABBAR (layout=cards) -->
+<div id="cards-tabbar"></div>
+
+<main id="main-content">
+  <header id="bar">
+    <div id="nav-btns">
+      <button id="back" title="Back (Alt+Left)">&#8592;</button>
+      <button id="fwd" title="Forward (Alt+Right)">&#8594;</button>
+      <button id="reload" title="Reload (Ctrl+R)">&#8635;</button>
+    </div>
+    <div id="addr-wrap">
+      <span id="addr-badge" class="addr-badge">✦</span>
+      <input id="addr" placeholder="Search or enter address" spellcheck="false" autocomplete="off">
+    </div>
+    <div id="bar-actions">
+      <button id="bar-interestsBtn" class="bar-pill-btn" title="Change persona & theme (What are you into?)">🎨 <span class="btn-txt">Interests</span></button>
+      <button id="bar-ts-btn" class="bar-icon-btn" title="3D Tab Switcher (Ctrl+Tab)">⬡</button>
+      <button id="aiBtn" class="bar-icon-btn" title="Orbit AI">✦</button>
+    </div>
+  </header>
+
+  <section id="views"></section>
+
+  <!-- START PAGE -->
+  <section id="start">
+    <div id="start-bg">
+      <div id="glow1" class="glow-layer"></div>
+      <div id="glow2" class="glow-layer"></div>
+    </div>
+    <div id="start-inner">
+      <div id="start-persona-tag" title="Click to change interests"></div>
+      <h1 id="greet"></h1>
+      <form id="searchForm">
+        <input id="q" placeholder="Search or enter address" autocomplete="off">
+        <button type="submit">&#8594;</button>
+      </form>
+      <div id="tiles"></div>
+      <div id="widgets"></div>
+    </div>
+  </section>
+</main>
+
+<script src="personas.js"></script>
+<script src="renderer.js"></script>
+</body></html>

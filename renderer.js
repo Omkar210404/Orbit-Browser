@@ -781,6 +781,13 @@ function renderCardTabs() {
   tsBtn.textContent = '⬡';
   tsBtn.onclick = () => openTabSwitcher();
   c.appendChild(tsBtn);
+
+  const aiTabBtn = document.createElement('button');
+  aiTabBtn.className = 'cards-action-btn';
+  aiTabBtn.title = 'Orbit AI (✦)';
+  aiTabBtn.textContent = '✦';
+  aiTabBtn.onclick = () => toggleAI();
+  c.appendChild(aiTabBtn);
 }
 
 /* ═══════════════════════════════════════════════════
@@ -1010,23 +1017,56 @@ function updateAIPersona(persona) {
   });
 }
 
-function toggleAI() {
+function openAI() {
   const panel = $('#ai-panel');
   if (!panel) return;
-  panel.classList.toggle('hidden');
-  if (!panel.classList.contains('hidden')) {
-    $('#ai-input')?.focus();
-    checkApiKeyStatus();
-  }
+  panel.classList.remove('hidden');
+  panel.style.display = 'flex';
+  $('#ai-input')?.focus();
+  checkApiKeyStatus();
 }
 
 function closeAI() {
-  $('#ai-panel')?.classList.add('hidden');
+  const panel = $('#ai-panel');
+  if (!panel) return;
+  panel.classList.add('hidden');
+  panel.style.display = 'none';
 }
 
-$('#aiBtn').onclick = toggleAI;
-$('#top-aiBtn')?.addEventListener('click', toggleAI);
-$('#ai-close').onclick = closeAI;
+function toggleAI() {
+  const panel = $('#ai-panel');
+  if (!panel) return;
+  if (panel.classList.contains('hidden') || panel.style.display === 'none') {
+    openAI();
+  } else {
+    closeAI();
+  }
+}
+
+window.closeAI = closeAI;
+window.openAI = openAI;
+window.toggleAI = toggleAI;
+
+$('#aiBtn')?.addEventListener('click', e => { e.stopPropagation(); toggleAI(); });
+$('#top-aiBtn')?.addEventListener('click', e => { e.stopPropagation(); toggleAI(); });
+
+const aiCloseBtn = $('#ai-close');
+if (aiCloseBtn) {
+  aiCloseBtn.addEventListener('click', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeAI();
+  });
+}
+
+// Click outside AI sidebar to close it
+document.addEventListener('pointerdown', e => {
+  const panel = $('#ai-panel');
+  if (!panel || panel.classList.contains('hidden') || panel.style.display === 'none') return;
+  if (panel.contains(e.target)) return;
+  if (e.target.closest('#aiBtn, #top-aiBtn, .cards-action-btn, #bar-actions')) return;
+  closeAI();
+});
 
 async function checkApiKeyStatus() {
   const statusEl = $('#ai-key-status');

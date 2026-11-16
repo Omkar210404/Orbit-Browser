@@ -1183,7 +1183,17 @@ webview.on { display: flex; }
   box-shadow: -4px 0 24px rgba(0,0,0,0.4);
   transition: transform var(--trans), background var(--trans), border-color var(--trans);
 }
-#ai-panel.hidden { transform: translateX(100%); }
+body[data-layout="sidebar"] #ai-panel { top: 44px; }
+body[data-layout="top"] #ai-panel { top: 88px; }
+body[data-layout="cards"] #ai-panel { top: 118px; }
+
+#ai-panel.hidden {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  transform: translateX(100%) !important;
+}
 
 #ai-header {
   display: flex;
@@ -1495,7 +1505,10 @@ webview.on { display: flex; }
     bottom: 0;
     transform: none;
   }
-  #ai-panel.hidden { transform: translateY(100%); }
+  #ai-panel.hidden {
+    display: none !important;
+    transform: translateY(100%) !important;
+  }
 }
 
 /* ═══════════════════════════════════════════════════

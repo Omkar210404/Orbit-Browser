@@ -205,20 +205,25 @@ const PERSONAS = [
 
 // Merge up to 3 personas: take the first's theme/layout, merge shortcuts+widgets
 function mergePersonas(ids) {
-  const selected = ids.map(id => PERSONAS.find(p => p.id === id)).filter(Boolean);
+  const allList = (typeof window !== 'undefined' && window.PERSONAS) ? window.PERSONAS : PERSONAS;
+  const selected = ids.map(id => allList.find(p => p.id === id)).filter(Boolean);
   if (!selected.length) return null;
   const primary = selected[0];
   // Merge shortcuts (deduplicate by url)
   const seenUrls = new Set();
   const shortcuts = [];
   for (const p of selected) {
-    for (const s of p.shortcuts) {
+    for (const s of (p.shortcuts || [])) {
       if (!seenUrls.has(s.url)) { seenUrls.add(s.url); shortcuts.push(s); }
     }
   }
   // Merge widgets (deduplicate)
-  const widgets = [...new Set(selected.flatMap(p => p.widgets))];
+  const widgets = [...new Set(selected.flatMap(p => p.widgets || []))];
   return { ...primary, shortcuts, widgets };
 }
 
+if (typeof window !== 'undefined') {
+  window.PERSONAS = PERSONAS;
+  window.mergePersonas = mergePersonas;
+}
 if (typeof module !== 'undefined') module.exports = { PERSONAS, mergePersonas };

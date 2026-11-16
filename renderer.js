@@ -73,6 +73,53 @@ function activatePersonas(ids) {
 /* ═══════════════════════════════════════════════════
    ONBOARDING & CATEGORY SELECTOR
 ═══════════════════════════════════════════════════ */
+function getPersonasList() {
+  if (typeof window !== 'undefined' && Array.isArray(window.PERSONAS) && window.PERSONAS.length) {
+    return window.PERSONAS;
+  }
+  if (typeof PERSONAS !== 'undefined' && Array.isArray(PERSONAS) && PERSONAS.length) {
+    return PERSONAS;
+  }
+  return [
+    {
+      id: 'developer', name: 'Developer', emoji: '💻', desc: 'Dark terminal vibes, keyboard-first.',
+      theme: { bg: '#09110a', panel: '#101e12', line: '#1f3d24', text: '#e6ffe8', mute: '#74af7a', acc: '#00ff88', font: '"JetBrains Mono", monospace', glow1: '#00ff8833', glow2: '#00aa5522', titleBar: '#101e12', titleSym: '#00ff88' },
+      tabLayout: 'sidebar', shortcuts: [{ name: 'GitHub', icon: '🐙', url: 'https://github.com' }, { name: 'Stack Overflow', icon: '🔥', url: 'https://stackoverflow.com' }], widgets: ['clock', 'notes'],
+      aiPersona: { systemPrompt: 'You are a senior software engineer assistant.', chips: ['Explain code', 'Debug error', 'Best practices'] }
+    },
+    {
+      id: 'student', name: 'Student', emoji: '📚', desc: 'Clean, distraction-free, focused study.',
+      theme: { bg: '#f4f7fa', panel: '#ffffff', line: '#d2dce6', text: '#1a222c', mute: '#62778c', acc: '#0066cc', font: 'system-ui', glow1: '#0066cc22', glow2: '#4da6ff1a', titleBar: '#ffffff', titleSym: '#0066cc' },
+      tabLayout: 'top', shortcuts: [{ name: 'Wikipedia', icon: '🌐', url: 'https://en.wikipedia.org' }, { name: 'Google Scholar', icon: '🎓', url: 'https://scholar.google.com' }], widgets: ['clock', 'focus', 'notes'],
+      aiPersona: { systemPrompt: 'You are an academic study assistant.', chips: ['Summarize topic', 'Quiz me', 'Study plan'] }
+    },
+    {
+      id: 'gamer', name: 'Gamer', emoji: '🎮', desc: 'Cyberpunk neon glow, immersive cards.',
+      theme: { bg: '#0a0012', panel: '#170126', line: '#3c0260', text: '#ffe6f6', mute: '#b866a8', acc: '#ff007f', font: 'system-ui', glow1: '#ff007f44', glow2: '#8000ff33', titleBar: '#170126', titleSym: '#ff007f' },
+      tabLayout: 'cards', shortcuts: [{ name: 'Twitch', icon: '💜', url: 'https://twitch.tv' }, { name: 'Discord', icon: '💬', url: 'https://discord.com' }, { name: 'Steam', icon: '🎮', url: 'https://store.steampowered.com' }], widgets: ['clock'],
+      aiPersona: { systemPrompt: 'You are a gaming companion assistant.', chips: ['Game builds', 'Patch notes', 'Tips & strats'] }
+    },
+    {
+      id: 'creator', name: 'Creator', emoji: '🎨', desc: 'Warm tones, studio layout, inspiration.',
+      theme: { bg: '#140c06', panel: '#24160d', line: '#472d1d', text: '#fff5ed', mute: '#b88a6d', acc: '#ff9900', font: 'system-ui', glow1: '#ff990038', glow2: '#ff440026', titleBar: '#24160d', titleSym: '#ff9900' },
+      tabLayout: 'cards', shortcuts: [{ name: 'Unsplash', icon: '📷', url: 'https://unsplash.com' }, { name: 'Pinterest', icon: '📌', url: 'https://pinterest.com' }], widgets: ['clock', 'notes'],
+      aiPersona: { systemPrompt: 'You are a creative director assistant.', chips: ['Color palettes', 'Critique design', 'Title ideas'] }
+    },
+    {
+      id: 'business', name: 'Business', emoji: '📈', desc: 'Executive navy, sharp tabs, high utility.',
+      theme: { bg: '#060e1a', panel: '#0c1a2e', line: '#173052', text: '#e6f0fa', mute: '#6d8cb0', acc: '#00bfff', font: 'system-ui', glow1: '#00bfff2b', glow2: '#0066cc22', titleBar: '#0c1a2e', titleSym: '#00bfff' },
+      tabLayout: 'top', shortcuts: [{ name: 'LinkedIn', icon: '💼', url: 'https://linkedin.com' }, { name: 'Google Calendar', icon: '📅', url: 'https://calendar.google.com' }], widgets: ['clock', 'notes'],
+      aiPersona: { systemPrompt: 'You are an executive business analyst assistant.', chips: ['Draft email', 'Meeting summary', 'Market insight'] }
+    },
+    {
+      id: 'entertainment', name: 'Entertainment', emoji: '🍿', desc: 'Cinematic dark red, discover & watch.',
+      theme: { bg: '#120406', panel: '#22080c', line: '#451018', text: '#ffe6e8', mute: '#b36872', acc: '#ff2d55', font: 'system-ui', glow1: '#ff2d5538', glow2: '#ff003326', titleBar: '#22080c', titleSym: '#ff2d55' },
+      tabLayout: 'sidebar', shortcuts: [{ name: 'YouTube', icon: '▶️', url: 'https://youtube.com' }, { name: 'Netflix', icon: '🎬', url: 'https://netflix.com' }], widgets: ['clock'],
+      aiPersona: { systemPrompt: 'You are an entertainment guide assistant.', chips: ['Recommend movie', 'What to watch', 'Similar music'] }
+    }
+  ];
+}
+
 const ob = {
   el: $('#onboarding'),
   selected: [],         // persona ids selected
@@ -81,8 +128,16 @@ const ob = {
 
 function buildOnboarding() {
   const container = $('#ob-cards');
+  if (!container) return;
   container.innerHTML = '';
-  PERSONAS.forEach(p => {
+  const list = getPersonasList();
+
+  // If nothing is selected yet, default to first persona so user can always launch
+  if (!ob.selected.length && list.length) {
+    ob.selected.push(list[0].id);
+  }
+
+  list.forEach(p => {
     const card = document.createElement('div');
     const isSel = ob.selected.includes(p.id);
     card.className = 'ob-card' + (isSel ? ' selected' : '');
@@ -107,12 +162,18 @@ function buildOnboarding() {
 function toggleOBCard(id, card) {
   const idx = ob.selected.indexOf(id);
   if (idx > -1) {
-    ob.selected.splice(idx, 1);
-    card.classList.remove('selected');
+    // If only 1 selected, keep it selected or allow deselecting
+    if (ob.selected.length === 1) {
+      ob.selected.splice(idx, 1);
+      card.classList.remove('selected');
+    } else {
+      ob.selected.splice(idx, 1);
+      card.classList.remove('selected');
+    }
   } else {
     if (ob.selected.length >= 3) {
       $('#ob-sel-hint').textContent = 'Max 3 selected!';
-      setTimeout(() => { $('#ob-sel-hint').textContent = ''; }, 1500);
+      setTimeout(() => { updateOBPreview(); }, 1500);
       return;
     }
     ob.selected.push(id);
@@ -123,16 +184,18 @@ function toggleOBCard(id, card) {
 
 function updateOBPreview() {
   const btn = $('#ob-launch');
-  btn.disabled = ob.selected.length === 0;
+  if (!btn) return;
+  const count = ob.selected.length;
+  btn.disabled = false; // Always enabled so the user is never stuck!
   btn.textContent = activePersonaIds.length ? '✓ Apply Changes' : '🚀 Launch Orbit';
 
-  const count = ob.selected.length;
   $('#ob-sel-hint').textContent = count
     ? `${count} selected — first choice sets theme & layout`
-    : 'Choose at least 1 persona';
+    : 'Choose a persona or type your interest';
 
   // Live theme preview
-  const first = PERSONAS.find(p => p.id === ob.selected[0]);
+  const list = getPersonasList();
+  const first = list.find(p => p.id === ob.selected[0]);
   if (first) {
     const t = first.theme;
     $('#ob-bg').style.background =
@@ -163,8 +226,15 @@ function hideOnboarding() {
 
 $('#ob-close')?.addEventListener('click', hideOnboarding);
 
-$('#ob-launch').addEventListener('click', () => {
-  if (!ob.selected.length) return;
+$('#ob-launch')?.addEventListener('click', async () => {
+  const otherVal = $('#ob-other')?.value?.trim();
+  if (otherVal && (!ob.selected.length || !ob.customPersona)) {
+    await addOtherInterest();
+  }
+  if (!ob.selected.length) {
+    const list = getPersonasList();
+    if (list.length) ob.selected = [list[0].id];
+  }
   const ids = ob.customPersona
     ? [ob.customPersona.id, ...ob.selected].slice(0, 3)
     : [...ob.selected];
@@ -178,46 +248,203 @@ $('#bar-interestsBtn')?.addEventListener('click', showOnboarding);
 $('#interestsBtn')?.addEventListener('click', showOnboarding);
 $('#top-interestsBtn')?.addEventListener('click', showOnboarding);
 
-/* "Other" custom persona via AI */
-$('#ob-other-btn').addEventListener('click', async () => {
-  const interest = $('#ob-other').value.trim();
+/* Procedural fallback persona generator (works offline & without API keys) */
+function createProceduralPersona(rawInterest) {
+  const interest = (rawInterest || 'Custom').trim();
+  const cleanId = 'custom-' + interest.toLowerCase().replace(/\W+/g, '-').slice(0, 20);
+  const lower = interest.toLowerCase();
+  let emoji = '✦';
+  let acc = '#00ff88';
+  let bg = '#09110a';
+  let panel = '#101e12';
+  let line = '#1f3d24';
+  let text = '#e6ffe8';
+  let mute = '#74af7a';
+  let layout = 'sidebar';
+  let shortcuts = [];
+
+  if (/code|dev|program|software|tech|engineer|script|web|coding/i.test(lower)) {
+    emoji = '💻';
+    acc = '#00ff88';
+    bg = '#09110a';
+    panel = '#101e12';
+    line = '#1f3d24';
+    text = '#e6ffe8';
+    mute = '#74af7a';
+    layout = 'sidebar';
+    shortcuts = [
+      { name: 'GitHub', icon: '🐙', url: 'https://github.com' },
+      { name: 'Stack Overflow', icon: '🔥', url: 'https://stackoverflow.com' },
+      { name: 'MDN Web Docs', icon: '📖', url: 'https://developer.mozilla.org' },
+      { name: 'Vercel', icon: '▲', url: 'https://vercel.com' },
+    ];
+  } else if (/study|school|learn|research|book|science|math|academic/i.test(lower)) {
+    emoji = '📚';
+    acc = '#0066cc';
+    bg = '#f4f7fa';
+    panel = '#ffffff';
+    line = '#d2dce6';
+    text = '#1a222c';
+    mute = '#62778c';
+    layout = 'top';
+    shortcuts = [
+      { name: 'Wikipedia', icon: '🌐', url: 'https://en.wikipedia.org' },
+      { name: 'Google Scholar', icon: '🎓', url: 'https://scholar.google.com' },
+      { name: 'Khan Academy', icon: '📖', url: 'https://khanacademy.org' },
+    ];
+  } else if (/game|esport|play|steam|rpg|fps|stream/i.test(lower)) {
+    emoji = '🎮';
+    acc = '#ff007f';
+    bg = '#0a0012';
+    panel = '#170126';
+    line = '#3c0260';
+    text = '#ffe6f6';
+    mute = '#b866a8';
+    layout = 'cards';
+    shortcuts = [
+      { name: 'Twitch', icon: '💜', url: 'https://twitch.tv' },
+      { name: 'Discord', icon: '💬', url: 'https://discord.com' },
+      { name: 'Steam', icon: '🎮', url: 'https://store.steampowered.com' },
+      { name: 'IGN', icon: '🎯', url: 'https://ign.com' },
+    ];
+  } else if (/photo|art|design|draw|paint|creative|camera|video/i.test(lower)) {
+    emoji = '📷';
+    acc = '#ff9900';
+    bg = '#140c06';
+    panel = '#24160d';
+    line = '#472d1d';
+    text = '#fff5ed';
+    mute = '#b88a6d';
+    layout = 'cards';
+    shortcuts = [
+      { name: 'Unsplash', icon: '📷', url: 'https://unsplash.com' },
+      { name: 'Pinterest', icon: '📌', url: 'https://pinterest.com' },
+      { name: 'Behance', icon: '🎨', url: 'https://behance.net' },
+      { name: 'Dribbble', icon: '🏀', url: 'https://dribbble.com' },
+    ];
+  } else if (/music|audio|beat|song|guitar|piano|sound/i.test(lower)) {
+    emoji = '🎵';
+    acc = '#1db954';
+    bg = '#08120c';
+    panel = '#0f2015';
+    line = '#1d422b';
+    text = '#eaf8ef';
+    mute = '#6ba882';
+    layout = 'cards';
+    shortcuts = [
+      { name: 'Spotify', icon: '🎵', url: 'https://spotify.com' },
+      { name: 'SoundCloud', icon: '☁️', url: 'https://soundcloud.com' },
+      { name: 'YouTube Music', icon: '▶️', url: 'https://music.youtube.com' },
+    ];
+  } else {
+    emoji = '✦';
+    acc = '#d926ff';
+    bg = '#0d0519';
+    panel = '#1a0c30';
+    line = '#4c1e80';
+    text = '#fbf5ff';
+    mute = '#a878d6';
+    layout = 'cards';
+    shortcuts = [
+      { name: 'Google', icon: '🔍', url: 'https://google.com' },
+      { name: 'Reddit', icon: '🤖', url: 'https://reddit.com' },
+      { name: 'YouTube', icon: '▶️', url: 'https://youtube.com' },
+    ];
+  }
+
+  const capitalized = interest.charAt(0).toUpperCase() + interest.slice(1);
+  return {
+    id: cleanId,
+    name: capitalized,
+    emoji,
+    desc: `Custom ${capitalized} browser experience.`,
+    theme: {
+      bg, panel, line, text, mute, acc,
+      font: 'system-ui, sans-serif',
+      glow1: acc + '33',
+      glow2: acc + '22',
+      titleBar: panel,
+      titleSym: acc
+    },
+    tabLayout: layout,
+    shortcuts,
+    widgets: ['clock', 'focus', 'notes'],
+    aiPersona: {
+      systemPrompt: `You are an AI assistant specialized in ${interest}. Help the user with resources, ideas, questions, and guides.`,
+      chips: [`Best tools for ${interest}`, `Getting started with ${interest}`, `Tips and tricks`]
+    }
+  };
+}
+
+/* "Other" custom persona: checks AI first, smoothly falls back to procedural */
+async function addOtherInterest() {
+  const input = $('#ob-other');
+  if (!input) return;
+  const interest = input.value.trim();
   if (!interest) return;
-  $('#ob-other-btn').textContent = '…';
-  $('#ob-other-btn').disabled = true;
+  const btn = $('#ob-other-btn');
+  if (btn) {
+    btn.textContent = '…';
+    btn.disabled = true;
+  }
+
+  let persona = null;
   try {
-    const persona = await generateCustomPersona(interest);
+    persona = await generateCustomPersona(interest);
+  } catch (e) {
+    console.info('Using procedural persona generator for:', interest);
+    persona = createProceduralPersona(interest);
+  }
+
+  if (persona) {
     ob.customPersona = persona;
-    const card = document.createElement('div');
-    card.className = 'ob-card custom-persona selected';
-    card.dataset.id = persona.id;
-    card.style.setProperty('--card-acc', persona.theme.acc);
-    card.style.setProperty('--card-bg',  persona.theme.bg);
-    card.style.setProperty('--card-panel', persona.theme.panel);
-    card.innerHTML = `
-      <div class="ob-card-bg"></div>
-      <div class="ob-card-body">
-        <span class="ob-emoji">${persona.emoji}</span>
-        <strong>${persona.name}</strong>
-        <p>${persona.desc}</p>
-      </div>
-      <div class="ob-check">✓</div>`;
-    card.addEventListener('click', () => toggleOBCard(persona.id, card));
-    addTilt(card);
-    $('#ob-cards').appendChild(card);
+    const list = getPersonasList();
+    if (!list.find(p => p.id === persona.id)) list.push(persona);
+
+    let card = $(`#ob-cards .ob-card[data-id="${persona.id}"]`);
+    if (!card) {
+      card = document.createElement('div');
+      card.className = 'ob-card custom-persona selected';
+      card.dataset.id = persona.id;
+      card.style.setProperty('--card-acc', persona.theme.acc);
+      card.style.setProperty('--card-bg',  persona.theme.bg);
+      card.style.setProperty('--card-panel', persona.theme.panel);
+      card.innerHTML = `
+        <div class="ob-card-bg"></div>
+        <div class="ob-card-body">
+          <span class="ob-emoji">${persona.emoji}</span>
+          <strong>${persona.name}</strong>
+          <p>${persona.desc}</p>
+        </div>
+        <div class="ob-check">✓</div>`;
+      card.addEventListener('click', () => toggleOBCard(persona.id, card));
+      addTilt(card);
+      $('#ob-cards').prepend(card);
+    }
+
     if (!ob.selected.includes(persona.id)) {
       if (ob.selected.length >= 3) ob.selected.pop();
       ob.selected.unshift(persona.id);
-      updateOBPreview();
     }
-  } catch (e) {
-    console.warn('Custom persona failed', e);
+    updateOBPreview();
   }
-  $('#ob-other-btn').textContent = '✦ Add';
-  $('#ob-other-btn').disabled = false;
+
+  if (btn) {
+    btn.textContent = '✦ Add';
+    btn.disabled = false;
+  }
+}
+
+$('#ob-other-btn')?.addEventListener('click', addOtherInterest);
+$('#ob-other')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    addOtherInterest();
+  }
 });
 
 async function generateCustomPersona(interest) {
-  if (!window.orbit.generatePersona) throw new Error('No IPC bridge');
+  if (!window.orbit || !window.orbit.generatePersona) throw new Error('No IPC bridge');
   const raw = await window.orbit.generatePersona(interest);
   return validatePersona(raw, interest);
 }
@@ -562,9 +789,10 @@ function renderCardTabs() {
 function buildGreeting() {
   const h = new Date().getHours();
   const tod = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+  const list = getPersonasList();
   const names = activePersona
     ? activePersonaIds.map(id => {
-        const p = PERSONAS.find(x => x.id === id) || (activePersona?.id === id ? activePersona : null);
+        const p = list.find(x => x.id === id) || (activePersona?.id === id ? activePersona : null);
         return p ? p.name : '';
       }).filter(Boolean).join(' + ')
     : '';

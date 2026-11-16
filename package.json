@@ -1,8 +1,14 @@
 {
   "name": "orbit-browser",
   "version": "0.1.0",
-  "description": "Orbit - custom browser (phase 1)",
+  "description": "Adaptive, persona-driven Electron browser with 3D layouts, real brand logos, and Gemini AI assistant",
   "main": "main.js",
+  "author": "Omkar210404",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Omkar210404/Orbit-Browser.git"
+  },
   "scripts": {
     "start": "electron ."
   },

@@ -1011,15 +1011,75 @@ function updateAIPersona(persona) {
 }
 
 function toggleAI() {
-  $('#ai-panel').classList.toggle('hidden');
-  if (!$('#ai-panel').classList.contains('hidden')) {
-    $('#ai-input').focus();
+  const panel = $('#ai-panel');
+  if (!panel) return;
+  panel.classList.toggle('hidden');
+  if (!panel.classList.contains('hidden')) {
+    $('#ai-input')?.focus();
+    checkApiKeyStatus();
   }
+}
+
+function closeAI() {
+  $('#ai-panel')?.classList.add('hidden');
 }
 
 $('#aiBtn').onclick = toggleAI;
 $('#top-aiBtn')?.addEventListener('click', toggleAI);
-$('#ai-close').onclick = () => $('#ai-panel').classList.add('hidden');
+$('#ai-close').onclick = closeAI;
+
+async function checkApiKeyStatus() {
+  const statusEl = $('#ai-key-status');
+  const drawer = $('#ai-key-drawer');
+  if (!window.orbit || !window.orbit.getApiKey) return;
+  try {
+    const key = await window.orbit.getApiKey();
+    if (key) {
+      if (statusEl) statusEl.innerHTML = '<span style="color:#27c93f">✓ Key saved securely in safeStorage</span>';
+      const keyBtn = $('#ai-key-btn');
+      if (keyBtn) keyBtn.textContent = '🔑 Key ✓';
+    } else {
+      if (statusEl) statusEl.innerHTML = '<span style="color:#ffbd2e">⚠️ No key stored yet</span>';
+      const keyBtn = $('#ai-key-btn');
+      if (keyBtn) keyBtn.textContent = '🔑 Set Key';
+      drawer?.classList.remove('hidden');
+    }
+  } catch(e) {}
+}
+
+$('#ai-key-btn')?.addEventListener('click', () => {
+  $('#ai-key-drawer')?.classList.toggle('hidden');
+  $('#ai-key-input')?.focus();
+});
+
+$('#ai-key-save')?.addEventListener('click', async () => {
+  const input = $('#ai-key-input');
+  const key = input ? input.value.trim() : '';
+  const statusEl = $('#ai-key-status');
+  if (!key) {
+    if (statusEl) statusEl.innerHTML = '<span style="color:#ff5f56">Please enter a key</span>';
+    return;
+  }
+  try {
+    await window.orbit.saveApiKey(key);
+    if (statusEl) statusEl.innerHTML = '<span style="color:#27c93f">✓ Key saved successfully!</span>';
+    const keyBtn = $('#ai-key-btn');
+    if (keyBtn) keyBtn.textContent = '🔑 Key ✓';
+    input.value = '';
+    setTimeout(() => {
+      $('#ai-key-drawer')?.classList.add('hidden');
+    }, 1200);
+  } catch(e) {
+    if (statusEl) statusEl.innerHTML = `<span style="color:#ff5f56">Error: ${e.message}</span>`;
+  }
+});
+
+$('#ai-key-input')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    $('#ai-key-save')?.click();
+  }
+});
 
 $('#ai-form').onsubmit = e => {
   e.preventDefault();
@@ -1050,7 +1110,18 @@ async function sendAIMessage(msg) {
     if (last) last.textContent = reply;
   } catch (e) {
     const last = $('#ai-msgs').lastElementChild;
-    if (last) last.textContent = 'Note: ' + e.message;
+    if (e.message && e.message.includes('No API key')) {
+      if (last) last.innerHTML = `⚠️ <b>No API key stored.</b><br>Please enter your Gemini API key above to chat with Orbit AI.<br><a href="#" id="inline-key-link" style="color:var(--acc);text-decoration:underline;">Click here to enter API key</a>`;
+      $('#inline-key-link')?.addEventListener('click', ev => {
+        ev.preventDefault();
+        $('#ai-key-drawer')?.classList.remove('hidden');
+        $('#ai-key-input')?.focus();
+      });
+      $('#ai-key-drawer')?.classList.remove('hidden');
+      $('#ai-key-input')?.focus();
+    } else {
+      if (last) last.textContent = 'Note: ' + e.message;
+    }
   }
 }
 
@@ -1084,8 +1155,13 @@ window.addEventListener('keydown', e => {
   if (e.altKey && e.key === 'ArrowLeft') { e.preventDefault(); handleBack(); return; }
   if (e.altKey && e.key === 'ArrowRight') { e.preventDefault(); handleForward(); return; }
 
-  // Escape closes modals
+  // Escape closes modals & sidebars
   if (e.key === 'Escape') {
+    const aiPanel = $('#ai-panel');
+    if (aiPanel && !aiPanel.classList.contains('hidden')) {
+      closeAI();
+      return;
+    }
     if (!ob.el.classList.contains('hidden') && activePersonaIds.length) {
       hideOnboarding();
       return;
